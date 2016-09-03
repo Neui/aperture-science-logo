@@ -1,0 +1,172 @@
+# Customizable variables
+
+rotation_allow = 1;
+rotation_speed_normal = 0.005;
+
+font_name = "Sans";
+font_size = "12";
+
+msgs["spacing"] = 0;
+
+# Runtime Variables
+
+msgs["size"] = 0;
+status = "normal";
+font = font_name + " " + font_size;
+
+time = 0;
+rotation = 0;
+rotation_speed = rotation_speed_normal;
+
+imgname_main = "bg";
+imgname_main_glow = "bg_glow";
+
+if (Window.GetBitsPerPixel() == 4) {
+	imgname_main = "" + imgname_main + "";
+	imgname_main_glow = "" + imgname_main_glow + "";
+}
+
+imgname_main += ".png";
+imgname_main_glow += ".png";
+
+img_main = Image(imgname_main);
+img_main_glow = Image(imgname_main_glow);
+
+window_width = Window.GetWidth();
+window_height = Window.GetHeight();
+
+
+# Helper functions
+
+fun pos_pct_x(width, pct)
+{
+	return window_width * pct - width / 2;
+}
+
+fun pos_pct_y(height, pct)
+{
+	return window_height * pct - height / 2;
+}
+
+fun spr_pct_x(spr, pct)
+{
+	spr.SetX(pos_pct_x(spr.GetImage().GetWidth(), pct));
+}
+
+fun spr_pct_y(spr, pct)
+{
+	spr.SetY(pos_pct_y(spr.GetImage().GetHeight(), pct));
+}
+
+
+# Callbacks
+
+fun tick()
+{
+	time += 0.05;
+	spr_main_glow.SetOpacity(Math.Clamp(Math.Sin(time), 0, 1));
+	
+	if (rotation_allow == 1) {
+		rotation += rotation_speed;
+		spr_main.SetImage(img_main.Rotate(rotation));
+		spr_main_glow.SetImage(img_main_glow.Rotate(rotation));
+	}
+}
+
+fun normal()
+{
+	if (status == "password") {
+		# "Reset" msgs (remove first element)
+		for (i = 0; i < msgs["size"]; i++)
+			msgs[i] = msgs[i + 1];
+		msgs["size"]--;
+	}
+		
+	status = "normal";
+}
+
+fun display_msg(text)
+{
+	base_y = spr_main.GetY() + spr_main.GetImage().GetHeight() + 1;
+	
+	spr = Sprite();
+	spr.SetImage(Image.Text(text, 1, 1, 1, 1, font, "center"));
+	spr_pct_x(spr, 0.5);
+	spr.SetY(base_y);
+	
+	height_used = spr.GetImage().GetHeight() + msgs["spacing"];
+	
+	# Push entries one down
+	i = msgs["size"];
+	while (i--) {
+		if (i <= 10)
+			msgs[i + 1] = msgs[i];
+		else
+			msg[i + 1] = NULL;
+	}
+	
+	# Reposition sprites
+	msgs_size = msgs["size"];
+	for (i = 1; i <= msgs_size; i++) {
+		sprmsg = msgs[i];
+		sprmsg.SetOpacity(sprmsg.GetOpacity() - 0.10);
+		sprmsg.SetY(base_y + height_used);
+		height_used += sprmsg.GetImage().GetHeight() + msgs["spacing"];
+	}
+	
+	msgs["size"]++;
+	msgs[0] = spr;
+	
+}
+
+fun display_choice(text, choice)
+{
+	display_msg(text + "\n" + choice)
+}
+
+fun password(prompt, chars)
+{
+	prompt += ": ";
+	while (chars--)
+		prompt += "*";
+	
+	spr = Sprite();
+	spr.SetImage(Image.Text(prompt, 1, 1, 0, font, "center"));
+	
+	if (status != "password") {
+		status = "password";
+		display_msg(prompt);
+	}
+	
+	spr_pct_x(spr, 0.5);
+	spr.SetY(msgs[0].GetY());
+	msgs[0] = spr;
+}
+
+
+# Main Setup
+
+spr_main = Sprite();
+spr_main.SetImage(img_main);
+spr_main.SetZ(1);
+spr_pct_x(spr_main, 0.5);
+spr_pct_y(spr_main, 0.5);
+
+spr_main_glow = Sprite();
+spr_main_glow.SetImage(img_main_glow);
+spr_main_glow.SetZ(0);
+# We're assuming that the images are the same size
+spr_main_glow.SetX(spr_main.GetX());
+spr_main_glow.SetY(spr_main.GetY());
+
+Window.SetBackgroundTopColor(0.0, 0.0, 0.0);
+Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
+
+# Register Callbacks
+
+Plymouth.SetRefreshFunction(tick);
+Plymouth.SetDisplayNormalFunction(normal);
+Plymouth.SetUpdateStatusFunction(display_msg);
+Plymouth.SetMessageFunction(dispay_msg);
+Plymouth.SetDisplayQuestionFunction(display_choice);
+Plymouth.SetDisplayPasswordFunction(password);

@@ -1,0 +1,7 @@
+if background_color 0,0,0; then
+  clear
+fi
+
+color_normal=black
+
+#insmod png

@@ -1,0 +1,8 @@
+*.png
+*.jpg
+*.svg
+*.jpeg
+
+# The plymouth-file has a path, which differs on each user/setup.
+# Because of this, we generate the file in gen.sh and ignore it here.
+*.plymouth

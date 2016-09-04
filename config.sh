@@ -1,10 +1,12 @@
 #/bin/sh
 
-THEME_NAME="aperture-sience-logo"
-THEME_DESC="Aperture Sience Logo"
-THEME_PLYMOUTH="$THEME_NAME.plymouth"
-THEME_SCRIPT="$THEME_NAME.script"
-THEME_GRUB="$THEME_NAME.grub"
+THEME_NAME="Aperture Science Logo"
+THEME_NAMEF="aperture-science-logo"
+THEME_DESC="Aperture Science Logo"
+# Plymouth expects to be themename/themename.plymouth, for some reason...
+THEME_PLYMOUTH="$THEME_NAMEF.plymouth"
+THEME_SCRIPT="$THEME_NAMEF.script"
+THEME_GRUB="$THEME_NAMEF.grub"
 # For now, use PWD for the theme dir
 THEME_DIR="$PWD"
 PLYMOUTH_DIR=""
@@ -13,6 +15,8 @@ for DIR in "$PLYMOUTH_THEMES" "/usr/share/plymouth/themes" \
 	"/lib/plymouth/themes"; do
 	test -d "$DIR" && PLYMOUTH_DIR="$DIR"
 done
+
+THEME_PLYMOUTH="$(basename "$THEME_DIR").plymouth"
 
 
 
